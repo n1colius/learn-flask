@@ -3,19 +3,24 @@
 Task schemas for validation and serialization.
 """
 
-from app import ma
-from marshmallow import fields, validate
+from marshmallow import Schema, fields, validate
 
 
-class TaskSchema(ma.Schema):
+class TaskSchema(Schema):
     """Response schema for tasks."""
 
-    class Meta:
-        fields = ('id', 'title', 'description', 'status', 'priority', 'due_date',
-                  'project_id', 'created_at', 'updated_at')
+    id = fields.Integer(dump_only=True)
+    title = fields.String(dump_only=True)
+    description = fields.String(dump_only=True, allow_none=True)
+    status = fields.String(dump_only=True)
+    priority = fields.String(dump_only=True)
+    due_date = fields.DateTime(dump_only=True, allow_none=True)
+    project_id = fields.Integer(dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
 
 
-class TaskCreateSchema(ma.Schema):
+class TaskCreateSchema(Schema):
     """Validation for creating a task."""
 
     title = fields.String(required=True, validate=validate.Length(min=1, max=200))
@@ -32,7 +37,7 @@ class TaskCreateSchema(ma.Schema):
     project_id = fields.Integer(required=True)
 
 
-class TaskUpdateSchema(ma.Schema):
+class TaskUpdateSchema(Schema):
     """Validation for updating a task (all fields optional)."""
 
     title = fields.String(validate=validate.Length(min=1, max=200))

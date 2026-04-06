@@ -13,11 +13,10 @@ KEY CONCEPT — Marshmallow Fields:
   validate=Length()  → 'min:X|max:Y' in Laravel validation
 """
 
-from app import ma
-from marshmallow import fields, validate
+from marshmallow import Schema, fields, validate
 
 
-class UserSchema(ma.Schema):
+class UserSchema(Schema):
     """
     Serialization schema — controls what user data is returned in API responses.
 
@@ -34,13 +33,17 @@ class UserSchema(ma.Schema):
       }
 
     Notice: 'password' is NOT included — just like you'd exclude it in Laravel.
+    dump_only=True means the field is only used for output (serialization), never input.
     """
 
-    class Meta:
-        fields = ('id', 'name', 'email', 'created_at', 'updated_at')
+    id = fields.Integer(dump_only=True)
+    name = fields.String(dump_only=True)
+    email = fields.Email(dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
 
 
-class UserRegisterSchema(ma.Schema):
+class UserRegisterSchema(Schema):
     """
     Validation schema for user registration.
 
@@ -68,7 +71,7 @@ class UserRegisterSchema(ma.Schema):
     )
 
 
-class UserLoginSchema(ma.Schema):
+class UserLoginSchema(Schema):
     """Validation schema for login."""
     email = fields.Email(required=True)
     password = fields.String(required=True, load_only=True)

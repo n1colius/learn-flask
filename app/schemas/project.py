@@ -3,21 +3,25 @@
 Project schemas for validation and serialization.
 """
 
-from app import ma
-from marshmallow import fields, validate
+from marshmallow import Schema, fields, validate
 
 
-class ProjectSchema(ma.Schema):
+class ProjectSchema(Schema):
     """
     Response schema — what gets returned when you fetch a project.
     Laravel equivalent: ProjectResource
     """
 
-    class Meta:
-        fields = ('id', 'name', 'description', 'status', 'user_id', 'created_at', 'updated_at')
+    id = fields.Integer(dump_only=True)
+    name = fields.String(dump_only=True)
+    description = fields.String(dump_only=True, allow_none=True)
+    status = fields.String(dump_only=True)
+    user_id = fields.Integer(dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
 
 
-class ProjectCreateSchema(ma.Schema):
+class ProjectCreateSchema(Schema):
     """
     Validation for creating a project.
 
@@ -35,7 +39,7 @@ class ProjectCreateSchema(ma.Schema):
     )
 
 
-class ProjectUpdateSchema(ma.Schema):
+class ProjectUpdateSchema(Schema):
     """
     Validation for updating a project.
     All fields optional (partial update / PATCH).
