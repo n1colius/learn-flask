@@ -1,0 +1,11 @@
+# Think of this like composer.json in Laravel
+# Install with: pip install -r requirements.txt (like "composer install")
+
+Flask==3.1.0              # The framework (like Laravel itself)
+Flask-SQLAlchemy==3.1.1   # ORM for database (like Eloquent in Laravel)
+Flask-Migrate==4.1.0      # Database migrations (like "php artisan migrate")
+Flask-JWT-Extended==4.7.1 # JWT authentication (like Laravel Sanctum/Passport)
+Flask-Marshmallow==1.2.1  # Request validation & serialization (like Form Requests)
+marshmallow-sqlalchemy==1.1.0  # Auto-generate schemas from models
+python-dotenv==1.1.0      # Load .env file (same concept as Laravel's .env)
+bcrypt==4.3.0             # Password hashing (like Hash::make() in Laravel)
