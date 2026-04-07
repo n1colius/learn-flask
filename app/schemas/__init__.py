@@ -13,3 +13,5 @@ ONE schema handles BOTH validation and serialization. Pretty neat!
 from app.schemas.user import UserSchema, UserLoginSchema, UserRegisterSchema
 from app.schemas.project import ProjectSchema, ProjectCreateSchema, ProjectUpdateSchema
 from app.schemas.task import TaskSchema, TaskCreateSchema, TaskUpdateSchema
+from app.schemas.comment import CommentSchema, CommentCreateSchema, CommentUpdateSchema
+from app.schemas.tag import TagSchema, TagCreateSchema, TagUpdateSchema

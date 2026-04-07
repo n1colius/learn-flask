@@ -9,4 +9,6 @@ In Laravel, models live in app/Models/. In Flask, we put them in app/models/.
 # Import all models here so they're registered with SQLAlchemy
 from app.models.user import User
 from app.models.project import Project
-from app.models.task import Task
+from app.models.tag import Tag          # Tag must be imported BEFORE Task (Task imports task_tags from tag.py)
+from app.models.task import Task        # Task imports task_tags from tag.py
+from app.models.comment import Comment  # Comment depends on Task and User

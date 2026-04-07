@@ -50,10 +50,14 @@ def create_app():
     from app.routes.auth import auth_bp
     from app.routes.projects import projects_bp
     from app.routes.tasks import tasks_bp
+    from app.routes.comments import comments_bp
+    from app.routes.tags import tags_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(projects_bp, url_prefix='/api/projects')
     app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
+    app.register_blueprint(comments_bp, url_prefix='/api/comments')
+    app.register_blueprint(tags_bp, url_prefix='/api/tags')
 
     # ── Register Error Handlers ─────────────────────────────────────
     # Laravel equivalent: app/Exceptions/Handler.php
