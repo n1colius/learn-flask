@@ -4,6 +4,135 @@ A real-world REST API built with Flask — designed for Laravel developers learn
 
 Every file has comments mapping Flask concepts to their Laravel equivalents.
 
+## Learning Flow (Start Here)
+
+If you are coming from Laravel and reading this project for the first time,
+follow this exact order. Each step builds on the previous one.
+
+---
+
+### Stage 1 — Understand the Boot Process
+> *Goal: Know how Flask starts up, like tracing `public/index.php` in Laravel.*
+
+| Step | File to Read | What to Focus On |
+|------|-------------|------------------|
+| 1 | `run.py` | This is the entry point. Like `php artisan serve`. See how `create_app()` is called. |
+| 2 | `app/__init__.py` | The app factory. See how extensions (`db`, `jwt`) are created and blueprints are registered. Compare to Laravel's `bootstrap/app.php`. |
+| 3 | `app/config.py` | How `.env` values are loaded into the app. Same concept as Laravel's `config/*.php`. |
+
+**Key question to answer:** *What is `create_app()` and why does Flask use a factory function instead of a global app?*
+
+---
+
+### Stage 2 — Understand Models & the Database
+> *Goal: Know how SQLAlchemy models replace Eloquent + migrations.*
+
+| Step | File to Read | What to Focus On |
+|------|-------------|------------------|
+| 4 | `app/models/user.py` | Your first model. Read every comment. Notice columns are defined IN the class (not in a separate migration). |
+| 5 | `app/models/project.py` | See `ForeignKey` and `db.relationship()`. Compare to `belongsTo` / `hasMany` in Eloquent. |
+| 6 | `app/models/task.py` | See TWO relationships: `hasMany` (comments) and `belongsToMany` (tags). |
+| 7 | `app/models/tag.py` | See `db.Table()` — the pivot table. Understand why it has no Model class. |
+| 8 | `app/models/comment.py` | See `backref` shorthand vs `back_populates`. Understand the difference. |
+
+**Key question to answer:** *In Laravel you write migrations first. In Flask, what is the "source of truth" for the schema?*
+
+---
+
+### Stage 3 — Understand Validation & Serialization
+> *Goal: Know how one Schema replaces both FormRequest AND API Resource in Laravel.*
+
+| Step | File to Read | What to Focus On |
+|------|-------------|------------------|
+| 9  | `app/schemas/user.py` | Read all 3 schema classes. Notice `UserSchema` is for output, `UserRegisterSchema` is for input validation. |
+| 10 | `app/schemas/project.py` | See `load_default`, `validate.OneOf()`, `allow_none`. Map each to its Laravel validation rule. |
+| 11 | `app/schemas/tag.py` | See `validate.Regexp()` — regex validation on the color field. |
+
+**Key question to answer:** *What is the difference between `dump_only=True` and `load_only=True`?*
+
+---
+
+### Stage 4 — Understand Routes (Blueprints)
+> *Goal: Know how Blueprints replace Controllers + `routes/api.php` in Laravel.*
+
+| Step | File to Read | What to Focus On |
+|------|-------------|------------------|
+| 12 | `app/routes/auth.py` | Read the `register()` function line by line. It shows the full request lifecycle: get JSON → validate → save → respond. |
+| 13 | `app/routes/auth.py` | Read the `me()` function. Focus on `@jwt_required()` decorator — this IS your middleware. |
+| 14 | `app/routes/projects.py` | Read `index()` — see filtering + pagination. Read `store()`, `update()`, `destroy()`. |
+| 15 | `app/routes/tasks.py` | Same CRUD pattern. Notice the JOIN query used to verify ownership across relationships. |
+| 16 | `app/routes/comments.py` | See how authorization works manually (checking `comment.user_id != current_user_id`). |
+| 17 | `app/routes/tags.py` | Read `attach()`, `detach()`, `sync()`. This is the Many-to-Many in action — the most important part. |
+
+**Key question to answer:** *In Laravel, middleware is defined in the route or controller. In Flask, how do you protect a route?*
+
+---
+
+### Stage 5 — Understand Error Handling
+> *Goal: Know how Flask handles errors globally, like Laravel's `Handler.php`.*
+
+| Step | File to Read | What to Focus On |
+|------|-------------|------------------|
+| 18 | `app/errors.py` | See how `@app.errorhandler(404)` works. Compare to the `render()` method in Laravel's `Handler.php`. |
+
+---
+
+### Stage 6 — Run It and Experiment
+> *Goal: Make real API calls and see how the code responds.*
+
+```
+Recommended experiment order:
+
+1.  POST /api/auth/register       → Create your account
+2.  POST /api/auth/login          → Get your JWT token
+3.  GET  /api/auth/me             → Use the token (first protected request)
+4.  POST /api/projects            → Create a project
+5.  GET  /api/projects            → List projects (try ?status=active)
+6.  POST /api/tasks               → Create a task inside your project
+7.  GET  /api/tasks?project_id=1  → Filter tasks by project
+8.  POST /api/tags                → Create a tag
+9.  POST /api/tags/1/attach/1     → Attach tag to task (Many-to-Many!)
+10. POST /api/tags/sync/1         → Sync multiple tags at once
+11. POST /api/comments            → Add a comment to a task
+12. PUT  /api/comments/1          → Edit your comment
+13. DELETE /api/projects/1        → Delete a project (watch cascade delete tasks too)
+```
+
+---
+
+### Concept Map: Laravel → Flask
+
+```
+Laravel                          Flask
+─────────────────────────────────────────────────────
+public/index.php              →  run.py
+bootstrap/app.php             →  app/__init__.py  (create_app)
+config/*.php                  →  app/config.py
+app/Models/User.php           →  app/models/user.py
+Eloquent ORM                  →  SQLAlchemy (db.Model)
+database/migrations/          →  migrations/versions/  (auto-generated)
+php artisan migrate           →  flask db upgrade
+php artisan db:seed           →  python seed.py
+app/Http/Requests/            →  app/schemas/  (load schemas)
+app/Http/Resources/           →  app/schemas/  (dump schemas — SAME file!)
+app/Http/Controllers/         →  app/routes/   (Blueprint functions)
+routes/api.php                →  app/__init__.py  (register_blueprint)
+Middleware                    →  Decorators  (@jwt_required())
+app/Exceptions/Handler.php    →  app/errors.py
+$request->get_json()          →  request.get_json()
+$request->query('key')        →  request.args.get('key')
+response()->json([])          →  jsonify({})
+Hash::make($pw)               →  bcrypt.hashpw(...)
+auth()->id()                  →  get_jwt_identity()
+$model->save()                →  db.session.commit()
+DB::beginTransaction()        →  db.session  (auto-managed)
+$task->tags()->attach($id)    →  task.tags.append(tag)
+$task->tags()->detach($id)    →  task.tags.remove(tag)
+$task->tags()->sync([1,2,3])  →  task.tags = [tag1, tag2, tag3]
+```
+
+---
+
 ## Quick Start
 
 ```bash
